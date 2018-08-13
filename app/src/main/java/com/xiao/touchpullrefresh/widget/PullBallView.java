@@ -5,8 +5,10 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.util.AttributeSet;
@@ -16,6 +18,9 @@ import android.view.animation.Interpolator;
 
 import com.xiao.touchpullrefresh.BezierCurve;
 import com.xiao.touchpullrefresh.R;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 粘性下拉小球
@@ -55,6 +60,8 @@ public class PullBallView extends View {
     private Path mPath = new Path();
 
     private Paint mPathPaint;
+
+    private Paint mDotPaint;
     /**
      * 进度差值器
      */
@@ -102,8 +109,8 @@ public class PullBallView extends View {
         mCircleRadius = array.getDimension(R.styleable.PullBallView_pRadius, mCircleRadius);
         mDraggableHeight = array.getDimensionPixelOffset(R.styleable.PullBallView_pDragHeight, mDraggableHeight);
         mTargetAngle = array.getInteger(R.styleable.PullBallView_pTangentAngle, mTargetAngle);
-        mTargetWidth = array.getInteger(R.styleable.PullBallView_pTargetWidth, mTargetWidth);
-        mTargetGravityHeight = array.getInteger(R.styleable.PullBallView_pTargetGravityHeight, mTargetGravityHeight);
+        mTargetWidth = array.getDimensionPixelOffset(R.styleable.PullBallView_pTargetWidth, mTargetWidth);
+        mTargetGravityHeight = array.getDimensionPixelOffset(R.styleable.PullBallView_pTargetGravityHeight, mTargetGravityHeight);
         mDrawable = array.getDrawable(R.styleable.PullBallView_pContentDrawable);
         mDrawableMargin = array.getDimensionPixelOffset(R.styleable.PullBallView_pContentDrawableMargin, mDrawableMargin);
 
@@ -121,6 +128,14 @@ public class PullBallView extends View {
         paint.setColor(color);
         mPathPaint = paint;
 
+        paint = new Paint();
+        paint.setAntiAlias(true);
+        paint.setDither(true);
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setColor(Color.BLACK);
+        paint.setStrokeWidth(10);
+        mDotPaint = paint;
+
         array.recycle();
     }
 
@@ -135,6 +150,9 @@ public class PullBallView extends View {
         canvas.drawPath(mPath, mPathPaint);
         canvas.drawCircle(mCirclePointX, mCirclePointY, mCircleRadius, mCirclePaint);
 
+        for (Point point : points) {
+            canvas.drawPoint(point.x, point.y, mDotPaint);
+        }
         Drawable drawable = mDrawable;
         if (drawable != null) {
             canvas.save();
@@ -200,11 +218,14 @@ public class PullBallView extends View {
         updatePathLayout();
     }
 
+
+    private List<Point> points = new ArrayList<>();
+
     /**
      * 更新路径相关操作
      */
     private void updatePathLayout() {
-
+        points.clear();
         //获取进度
         final float progress = mProgress;
 
@@ -223,10 +244,14 @@ public class PullBallView extends View {
         mCirclePointX = cPointX;
         mCirclePointY = cPointY;
 
+        points.add(new Point((int) mCirclePointX, (int) mCirclePointY));
+
         final Path path = mPath;
         path.reset();
 
         path.moveTo(0, 0);
+
+        points.add(new Point(0,0));
 
         //左边部分的结束点和控制点
         float lEndPointX, lEndPointY;
@@ -245,10 +270,16 @@ public class PullBallView extends View {
         float tWidth = (float) (tHeight / Math.tan(radian));
 
         lControlPointX = lEndPointX - tWidth;
-
+        points.add(new Point((int) lControlPointX,(int) lControlPointY));
+        points.add(new Point((int) lEndPointX,(int) lEndPointY));
         path.quadTo(lControlPointX, lControlPointY, lEndPointX, lEndPointY);
         path.lineTo(cPointX + (cPointX - lEndPointX), lEndPointY);
+
+        points.add(new Point((int) (cPointX + (cPointX - lEndPointX)),(int) lEndPointY));
+
         path.quadTo(cPointX + (cPointX - lControlPointX), lControlPointY, w, 0);
+        points.add(new Point((int) (cPointX + (cPointX - lControlPointX)),(int) lControlPointY));
+        points.add(new Point((int) w,0));
 
         //更新内容部分drawable
         updateContentLayout(cPointX, cPointY, cRadius);

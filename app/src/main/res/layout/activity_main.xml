@@ -11,7 +11,17 @@
     <com.xiao.touchpullrefresh.widget.PullBallView
         android:id="@+id/pull_ball"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="wrap_content"
+
+        app:pContentDrawable="@drawable/shape_circle"
+        app:pContentDrawableMargin="2dp"
+        app:pDragHeight="150dp"
+        app:pColor="@color/colorAccent"
+        app:pRadius="20dp"
+        app:pTangentAngle="110"
+        app:pTargetGravityHeight="4dp"
+        app:pTargetWidth="120dp"
+        android:visibility="visible"/>
 
     <!--<com.xiao.touchpullrefresh.widget.BezierView-->
     <!--android:layout_width="wrap_content"-->
