@@ -15,12 +15,12 @@
 
         app:pContentDrawable="@drawable/shape_circle"
         app:pContentDrawableMargin="2dp"
-        app:pDragHeight="150dp"
+        app:pDragHeight="120dp"
         app:pColor="@color/colorAccent"
         app:pRadius="20dp"
-        app:pTangentAngle="110"
+        app:pTangentAngle="90"
         app:pTargetGravityHeight="4dp"
-        app:pTargetWidth="120dp"
+        app:pTargetWidth="200dp"
         android:visibility="visible"/>
 
     <!--<com.xiao.touchpullrefresh.widget.BezierView-->

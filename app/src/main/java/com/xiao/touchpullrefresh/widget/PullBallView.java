@@ -11,6 +11,7 @@ import android.graphics.Path;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.support.v4.view.animation.PathInterpolatorCompat;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
@@ -136,6 +137,10 @@ public class PullBallView extends View {
         paint.setStrokeWidth(10);
         mDotPaint = paint;
 
+        //切角路径差值器
+        mTangentAnleInterpolator = PathInterpolatorCompat.create(
+                mCircleRadius * 2.0f / mDraggableHeight, 90.0f / mTargetAngle
+        );
         array.recycle();
     }
 
@@ -227,7 +232,7 @@ public class PullBallView extends View {
     private void updatePathLayout() {
         points.clear();
         //获取进度
-        final float progress = mProgress;
+        final float progress = mProgressInterpolator.getInterpolation(mProgress);
 
         float w = getCurrentValue(getWidth(), mTargetWidth, mProgress);
         float h = getCurrentValue(0, mDraggableHeight, mProgress);
@@ -248,16 +253,17 @@ public class PullBallView extends View {
 
         final Path path = mPath;
         path.reset();
-
+        //复位
         path.moveTo(0, 0);
 
-        points.add(new Point(0,0));
+        points.add(new Point(0, 0));
 
         //左边部分的结束点和控制点
         float lEndPointX, lEndPointY;
         float lControlPointX, lControlPointY;
 
-        float angle = mTargetAngle * mProgress;
+        //获取当前切线的弧度
+        float angle = mTargetAngle * mTangentAnleInterpolator.getInterpolation(mProgress);
         double radian = Math.toRadians(getCurrentValue(0, angle, progress));
         float x = (float) (Math.sin(radian) * cRadius);
         float y = (float) (Math.cos(radian) * cRadius);
@@ -266,20 +272,21 @@ public class PullBallView extends View {
         lEndPointY = cPointY + y;
 
         lControlPointY = getCurrentValue(0, endControlY, progress);
+        //控制点与结束点之间的高度
         float tHeight = lEndPointY - lControlPointY;
         float tWidth = (float) (tHeight / Math.tan(radian));
 
         lControlPointX = lEndPointX - tWidth;
-        points.add(new Point((int) lControlPointX,(int) lControlPointY));
-        points.add(new Point((int) lEndPointX,(int) lEndPointY));
+        points.add(new Point((int) lControlPointX, (int) lControlPointY));
+        points.add(new Point((int) lEndPointX, (int) lEndPointY));
         path.quadTo(lControlPointX, lControlPointY, lEndPointX, lEndPointY);
         path.lineTo(cPointX + (cPointX - lEndPointX), lEndPointY);
 
-        points.add(new Point((int) (cPointX + (cPointX - lEndPointX)),(int) lEndPointY));
+        points.add(new Point((int) (cPointX + (cPointX - lEndPointX)), (int) lEndPointY));
 
         path.quadTo(cPointX + (cPointX - lControlPointX), lControlPointY, w, 0);
-        points.add(new Point((int) (cPointX + (cPointX - lControlPointX)),(int) lControlPointY));
-        points.add(new Point((int) w,0));
+        points.add(new Point((int) (cPointX + (cPointX - lControlPointX)), (int) lControlPointY));
+        points.add(new Point((int) w, 0));
 
         //更新内容部分drawable
         updateContentLayout(cPointX, cPointY, cRadius);
