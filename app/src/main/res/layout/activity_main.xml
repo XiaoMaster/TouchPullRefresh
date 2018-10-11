@@ -12,7 +12,6 @@
         android:id="@+id/pull_ball"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-
         app:pContentDrawable="@drawable/shape_circle"
         app:pContentDrawableMargin="2dp"
         app:pDragHeight="120dp"

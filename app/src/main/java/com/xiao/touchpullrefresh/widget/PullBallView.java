@@ -17,7 +17,6 @@ import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 
-import com.xiao.touchpullrefresh.BezierCurve;
 import com.xiao.touchpullrefresh.R;
 
 import java.util.ArrayList;
@@ -70,7 +69,7 @@ public class PullBallView extends View {
     /**
      * 角度差值器
      */
-    private Interpolator mTangentAnleInterpolator;
+    private Interpolator mTangentAngleInterpolator;
 
     /**
      * 重心点最终的高度，决定控制点的Y坐标
@@ -138,7 +137,7 @@ public class PullBallView extends View {
         mDotPaint = paint;
 
         //切角路径差值器
-        mTangentAnleInterpolator = PathInterpolatorCompat.create(
+        mTangentAngleInterpolator = PathInterpolatorCompat.create(
                 mCircleRadius * 2.0f / mDraggableHeight, 90.0f / mTargetAngle
         );
         array.recycle();
@@ -263,7 +262,7 @@ public class PullBallView extends View {
         float lControlPointX, lControlPointY;
 
         //获取当前切线的弧度
-        float angle = mTargetAngle * mTangentAnleInterpolator.getInterpolation(mProgress);
+        float angle = mTargetAngle * mTangentAngleInterpolator.getInterpolation(mProgress);
         double radian = Math.toRadians(getCurrentValue(0, angle, progress));
         float x = (float) (Math.sin(radian) * cRadius);
         float y = (float) (Math.cos(radian) * cRadius);
